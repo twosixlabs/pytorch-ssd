@@ -22,6 +22,11 @@ class TrainAugmentation:
             lambda img, boxes=None, labels=None: (img / std, boxes, labels),
             ToTensor(),
         ])
+        self.augment_bg = Compose([
+            Resize(self.size),
+            lambda img, boxes=None, labels=None: (img / std, boxes, labels),
+            ToTensor(),
+        ])
 
     def __call__(self, img, boxes, labels):
         """
@@ -31,7 +36,17 @@ class TrainAugmentation:
             boxes: boundding boxes in the form of (x1, y1, x2, y2).
             labels: labels of boxes.
         """
-        return self.augment(img, boxes, labels)
+        # print("LABELS + BOXES[0]")
+        # print(labels)
+        # print(boxes[0].shape)
+        # from torchvision.transforms.functional import to_pil_image
+        # if len(boxes) == 0:
+        # to_pil_image(img).save('./debug_image.png')
+        if len(boxes) > 0:
+            return self.augment(img, boxes, labels)
+        else:
+            # print("No bounding boxes to augment; augmenting background image.")
+            return self.augment_bg(img, boxes, labels)
 
 
 class TestTransform:
@@ -43,9 +58,18 @@ class TestTransform:
             lambda img, boxes=None, labels=None: (img / std, boxes, labels),
             ToTensor(),
         ])
+        self.transform_bg = Compose([
+            Resize(size),
+            lambda img, boxes=None, labels=None: (img / std, boxes, labels),
+            ToTensor(),
+        ])
 
     def __call__(self, image, boxes, labels):
-        return self.transform(image, boxes, labels)
+        if len(boxes) > 0:
+            return self.transform(image, boxes, labels)
+        else:
+            # print("No bounding boxes to augment; augmenting background image.")
+            return self.transform_bg(image, boxes, labels)
 
 
 class PredictionTransform:

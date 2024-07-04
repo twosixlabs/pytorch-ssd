@@ -6,7 +6,8 @@ import math
 
 SSDBoxSizes = collections.namedtuple('SSDBoxSizes', ['min', 'max'])
 
-SSDSpec = collections.namedtuple('SSDSpec', ['feature_map_size', 'shrinkage', 'box_sizes', 'aspect_ratios'])
+SSDSpec = collections.namedtuple(
+    'SSDSpec', ['feature_map_size', 'shrinkage', 'box_sizes', 'aspect_ratios'])
 
 
 def generate_ssd_priors(specs: List[SSDSpec], image_size, clamp=True) -> torch.Tensor:
@@ -101,7 +102,8 @@ def convert_locations_to_boxes(locations, priors, center_variance,
     if priors.dim() + 1 == locations.dim():
         priors = priors.unsqueeze(0)
     return torch.cat([
-        locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
+        locations[..., :2] * center_variance *
+        priors[..., 2:] + priors[..., :2],
         torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:]
     ], dim=locations.dim() - 1)
 
@@ -111,8 +113,10 @@ def convert_boxes_to_locations(center_form_boxes, center_form_priors, center_var
     if center_form_priors.dim() + 1 == center_form_boxes.dim():
         center_form_priors = center_form_priors.unsqueeze(0)
     return torch.cat([
-        (center_form_boxes[..., :2] - center_form_priors[..., :2]) / center_form_priors[..., 2:] / center_variance,
-        torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:]) / size_variance
+        (center_form_boxes[..., :2] - center_form_priors[...,
+         :2]) / center_form_priors[..., 2:] / center_variance,
+        torch.log(center_form_boxes[..., 2:] /
+                  center_form_priors[..., 2:]) / size_variance
     ], dim=center_form_boxes.dim() - 1)
 
 
@@ -161,6 +165,12 @@ def assign_priors(gt_boxes, gt_labels, corner_form_priors,
         boxes (num_priors, 4): real values for priors.
         labels (num_priros): labels for priors.
     """
+    if gt_boxes.numel() == 0:
+        # If gt_boxes is empty, create a default tensor with the appropriate shape
+        num_priors = corner_form_priors.shape[0]
+        boxes = torch.zeros((num_priors, 4), dtype=torch.float32)
+        labels = torch.zeros((num_priors,), dtype=torch.int64)
+        return boxes, labels
     # size: num_priors x num_targets
     ious = iou_of(gt_boxes.unsqueeze(0), corner_form_priors.unsqueeze(1))
     # size: num_priors
@@ -206,13 +216,13 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
 
 def center_form_to_corner_form(locations):
     return torch.cat([locations[..., :2] - locations[..., 2:]/2,
-                     locations[..., :2] + locations[..., 2:]/2], locations.dim() - 1) 
+                     locations[..., :2] + locations[..., 2:]/2], locations.dim() - 1)
 
 
 def corner_form_to_center_form(boxes):
     return torch.cat([
         (boxes[..., :2] + boxes[..., 2:]) / 2,
-         boxes[..., 2:] - boxes[..., :2]
+        boxes[..., 2:] - boxes[..., :2]
     ], boxes.dim() - 1)
 
 
@@ -284,12 +294,10 @@ def soft_nms(box_scores, score_threshold, sigma=0.5, top_k=-1):
         box_scores[max_score_index, :] = box_scores[-1, :]
         box_scores = box_scores[:-1, :]
         ious = iou_of(cur_box.unsqueeze(0), box_scores[:, :-1])
-        box_scores[:, -1] = box_scores[:, -1] * torch.exp(-(ious * ious) / sigma)
+        box_scores[:, -1] = box_scores[:, -1] * \
+            torch.exp(-(ious * ious) / sigma)
         box_scores = box_scores[box_scores[:, -1] > score_threshold, :]
     if len(picked_box_scores) > 0:
         return torch.stack(picked_box_scores)
     else:
         return torch.tensor([])
-
-
-

@@ -53,6 +53,8 @@ class Compose(object):
     def __call__(self, img, boxes=None, labels=None):
         for t in self.transforms:
             img, boxes, labels = t(img, boxes, labels)
+            # print("IMG, BOXES, LABELS")
+            # print(img, boxes, labels)
         return img, boxes, labels
 
 
@@ -96,6 +98,8 @@ class ToAbsoluteCoords(object):
 class ToPercentCoords(object):
     def __call__(self, image, boxes=None, labels=None):
         height, width, channels = image.shape
+        # print("BOXES")
+        # print(boxes.shape)
         boxes[:, 0] /= width
         boxes[:, 2] /= width
         boxes[:, 1] /= height
@@ -110,7 +114,7 @@ class Resize(object):
 
     def __call__(self, image, boxes=None, labels=None):
         image = cv2.resize(image, (self.size,
-                                 self.size))
+                                   self.size))
         return image, boxes, labels
 
 
@@ -227,6 +231,7 @@ class RandomSampleCrop(object):
             boxes (Tensor): the adjusted bounding boxes in pt form
             labels (Tensor): the class labels for each bbox
     """
+
     def __init__(self):
         self.sample_options = (
             # using entire original input image
@@ -242,9 +247,14 @@ class RandomSampleCrop(object):
 
     def __call__(self, image, boxes=None, labels=None):
         height, width, _ = image.shape
+        # print("IMAGE SHAPE")
+        # print(image.shape)
         while True:
+            # uniform_sample_options = [
+            #     option for option in self.sample_options if option.shape == desired_shape]
             # randomly choose a mode
-            mode = random.choice(self.sample_options)
+            mode = None
+            # mode = random.choice(self.sample_options)
             if mode is None:
                 return image, boxes, labels
 
@@ -404,4 +414,3 @@ class PhotometricDistort(object):
             distort = Compose(self.pd[1:])
         im, boxes, labels = distort(im, boxes, labels)
         return self.rand_light_noise(im, boxes, labels)
-
