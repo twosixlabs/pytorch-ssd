@@ -12,7 +12,7 @@ pytorchssd = "pytorch-ssd.main"
 [project]
 name            = "pytorch_ssd"
 version         = "0.0.1"
-description     = "DETR: End-toEnd Object Detection with Transformers"
+description     = "Single Shot MultiBox Detector Implementation in Pytorch"
 readme          = "README.md"
 requires-python = ">=3.8"
 license-files = { paths = ["LICENSE"] }
