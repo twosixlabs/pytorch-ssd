@@ -173,7 +173,8 @@ def test(loader, net, criterion, device):
     return running_loss / num, running_regression_loss / num, running_classification_loss / num
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+def main():
     timer = Timer()
 
     logging.info(args)
@@ -352,3 +353,7 @@ if __name__ == '__main__':
                 args.checkpoint_folder, f"{args.net}-Epoch-{epoch}-Loss-{val_loss}.pth")
             net.save(model_path)
             logging.info(f"Saved model {model_path}")
+
+
+if __name__ == '__main__':
+    main()
