@@ -59,9 +59,9 @@ reproducible = true
 directory    = "dist"
 include = [
     "pytorch-ssd/",
-    "pytorch-ssd/LICENSE",
+    "LICENSE",
     "pyproject.toml",
-    "pytorch-ssd/README.md"
+    "README.md"
 ]
 
 
