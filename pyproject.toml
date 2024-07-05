@@ -6,7 +6,7 @@ requires = [
 ]
 
 [project.scripts]
-pytorchssd = "pytorch-ssd:main"
+pytorchssd = "pytorch-ssd.main:main"
 
 
 [project]
